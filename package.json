@@ -1,0 +1,31 @@
+{
+  "name": "redux-promises",
+  "version": "0.0.0",
+  "description": "Promise based middleware for Redux to deal with asynchronous actions.",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "node_modules/.bin/babel src --out-dir lib",
+    "test": "node_modules/.bin/mocha --compilers js:babel-register test/**",
+    "prepublish": "rm -rf lib && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CrocoDillon/redux-promises.git"
+  },
+  "keywords": [
+    "redux",
+    "async",
+    "promise",
+    "middleware"
+  ],
+  "author": "Dillon de Voor (http://crocodillon.com)",
+  "license": "CC0",
+  "devDependencies": {
+    "babel-cli": "^6.3.17",
+    "babel-plugin-add-module-exports": "^0.1.1",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-register": "^6.3.13",
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4"
+  }
+}
