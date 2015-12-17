@@ -1,5 +1,7 @@
 import isPromise from './utils/isPromise';
 
+const noop = () => {};
+
 export default () => {
   const promises = [];
 
@@ -17,8 +19,8 @@ export default () => {
     };
   };
 
-  promisesMiddleware.then = (onResolved, onRejected) => {
-    return Promise.all(promises).then(onResolved, onRejected);
+  promisesMiddleware.then = (callback) => {
+    return Promise.all(promises).then(noop, noop).then(callback);
   };
 
   return promisesMiddleware;
