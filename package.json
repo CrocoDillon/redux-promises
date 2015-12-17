@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "Promise based middleware for Redux to deal with asynchronous actions.",
   "main": "lib/index.js",
+  "files": [
+    "lib",
+    "src"
+  ],
   "scripts": {
     "build": "node_modules/.bin/babel src --out-dir lib",
     "test": "node_modules/.bin/mocha --compilers js:babel-register test/**",
