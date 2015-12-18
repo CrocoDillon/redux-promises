@@ -13,9 +13,9 @@ npm install --save redux-promises
 
 For server-side rendering in React you need to know when all asynchronous requests are either resolved or rejected. As a bonus you get thunks for free!
 
-## Examples
+## Example 1
 
-A simple example (working code can be found in the examples directory)
+A simple example, working code can be found in the `examples/simple` directory.
 
 ```javascript
 import { createStore, applyMiddleware } from 'redux';
@@ -42,5 +42,33 @@ store.dispatch(fetchData('http://api.example.com/another/resouce'));
 // Now we wait till all required data has been fetched
 promisesMiddleware.then(() => {
   // Fetching all data complete
+});
+```
+
+## Example 2
+
+In the previous example if you write a lot of action creators this way you might want a helper function to create them for you. Again working code can be found in the `examples/thunk-creator` directory.
+
+Credit for this syntax (and the previous one for that matter) goes to [Dan Abramov](https://github.com/rackt/redux/issues/99#issuecomment-112212639).
+
+```javascript
+const thunkCreator = (action) => {
+  const { types, promise, ...rest } = action;
+  const [ REQUESTED, RESOLVED, REJECTED ] = types;
+
+  return (dispatch) => {
+    dispatch({ ...rest, type: REQUESTED });
+
+    return promise.then(
+      (result) => dispatch({ ...rest, type: RESOLVED, result }),
+      (error) => dispatch({ ...rest, type: REJECTED, error })
+    );
+  };
+};
+
+// Action creator that returns a thunk that returns a promise
+const fetchData = (url) => thunkCreator({
+  types: ['FETCH_REQUEST', 'FETCH_SUCCESS', 'FETCH_FAILURE'],
+  promise: fetch(url)
 });
 ```
