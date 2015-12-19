@@ -11,6 +11,12 @@ export default () => {
         const promise = action(dispatch, getState);
         if (isPromise(promise)) {
           promises.push(promise);
+          promise.then(noop, noop).then(() => {
+            const index = promises.indexOf(promise);
+            if (index !== -1) {
+              promises.splice(index, 1);
+            }
+          });
         }
         return promise;
       } else {
