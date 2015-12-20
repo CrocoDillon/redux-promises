@@ -3,7 +3,7 @@ import isPromise from './utils/isPromise';
 const noop = () => {};
 
 export default () => {
-  const promises = [];
+  let promises = [];
 
   const promisesMiddleware = ({ dispatch, getState }) => {
     return (next) => (action) => {
@@ -12,10 +12,7 @@ export default () => {
         if (isPromise(promise)) {
           promises.push(promise);
           promise.then(noop, noop).then(() => {
-            const index = promises.indexOf(promise);
-            if (index !== -1) {
-              promises.splice(index, 1);
-            }
+            promises = promises.filter((p) => (p !== promise));
           });
         }
         return promise;
