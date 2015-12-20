@@ -1,6 +1,6 @@
 {
   "name": "redux-promises",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Promise based middleware for Redux to deal with asynchronous actions.",
   "main": "lib/index.js",
   "files": [
