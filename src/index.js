@@ -8,12 +8,13 @@ export default () => {
   const promisesMiddleware = ({ dispatch, getState }) => {
     return (next) => (action) => {
       if (typeof action === 'function') {
-        const promise = action(dispatch, getState);
+        let promise = action(dispatch, getState);
         if (isPromise(promise)) {
-          promises.push(promise);
-          promise.then(noop, noop).then(() => {
+          promise = promise.then(noop, noop);
+          promise.then(() => {
             promises = promises.filter((p) => (p !== promise));
           });
+          promises.push(promise);
         }
         return promise;
       } else {
@@ -23,7 +24,7 @@ export default () => {
   };
 
   promisesMiddleware.then = (callback) => {
-    return Promise.all(promises).then(noop, noop).then(callback);
+    return Promise.all(promises).then(callback);
   };
 
   return promisesMiddleware;
