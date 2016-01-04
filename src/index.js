@@ -1,11 +1,31 @@
 import isPromise from './utils/isPromise';
 
+const SELECT_STATE = (state) => (state.idle);
 const noop = () => {};
 
-export default () => {
+// constants
+const CHANGE_IDLE_STATE = '@@redux-promises/CHANGE_IDLE_STATE';
+
+// actions
+const changeIdleState = (state) => ({
+  type: CHANGE_IDLE_STATE,
+  state
+});
+
+// reducers
+const reducer = (state = true, action) => {
+  switch (action.type) {
+  case CHANGE_IDLE_STATE:
+    return action.state;
+    break;
+  }
+  return state;
+};
+
+const createMiddleware = () => {
   let promises = [];
 
-  const promisesMiddleware = ({ dispatch, getState }) => {
+  const middleware = ({ dispatch, getState }) => {
     return (next) => (action) => {
       if (typeof action === 'function') {
         let promise = action(dispatch, getState);
@@ -13,8 +33,12 @@ export default () => {
           promise = promise.then(noop, noop);
           promise.then(() => {
             promises = promises.filter((p) => (p !== promise));
+            if (promises.length === 0) {
+              dispatch(changeIdleState(true));
+            }
           });
           promises.push(promise);
+          dispatch(changeIdleState(false));
         }
         return promise;
       } else {
@@ -23,9 +47,28 @@ export default () => {
     };
   };
 
-  promisesMiddleware.then = (callback) => {
-    return Promise.all(promises).then(callback);
-  };
-
-  return promisesMiddleware;
+  return middleware;
 };
+
+const ensureIdleState = (store, selectState = SELECT_STATE) => {
+  const getIdleState = () => selectState(store.getState());
+
+  if (process.env.NODE_ENV !== 'production' && typeof getIdleState() !== 'boolean') {
+    throw new Error('Unable to get idle state, did you install the reducer ' +
+      'and use the correct `selectState`? (default `(state) => (state.idle)`)');
+  }
+
+  if (getIdleState()) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const unsubscribe = store.subscribe(() => {
+      if (getIdleState()) {
+        unsubscribe();
+        resolve();
+      }
+    });
+  });
+};
+export { reducer, createMiddleware, ensureIdleState };
