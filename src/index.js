@@ -17,7 +17,6 @@ const reducer = (state = true, action) => {
   switch (action.type) {
   case CHANGE_IDLE_STATE:
     return action.state;
-    break;
   }
   return state;
 };
@@ -28,9 +27,9 @@ const createMiddleware = () => {
   const middleware = ({ dispatch, getState }) => {
     return (next) => (action) => {
       if (typeof action === 'function') {
-        let promise = action(dispatch, getState);
-        if (isPromise(promise)) {
-          promise = promise.then(noop, noop);
+        const maybePromise = action(dispatch, getState);
+        if (isPromise(maybePromise)) {
+          const promise = maybePromise.then(noop, noop);
           promise.then(() => {
             promises = promises.filter((p) => (p !== promise));
             if (promises.length === 0) {
@@ -40,7 +39,7 @@ const createMiddleware = () => {
           promises.push(promise);
           dispatch(changeIdleState(false));
         }
-        return promise;
+        return maybePromise;
       } else {
         return next(action);
       }
@@ -71,4 +70,5 @@ const ensureIdleState = (store, selectState = SELECT_STATE) => {
     });
   });
 };
+
 export { reducer, createMiddleware, ensureIdleState };
