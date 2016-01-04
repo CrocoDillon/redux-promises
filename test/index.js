@@ -1,7 +1,7 @@
 import chai from 'chai';
-import promises from '../src/index';
+import { createMiddleware } from '../src/index';
 
-const promisesMiddleware = promises();
+const promisesMiddleware = createMiddleware();
 
 // Ensure backwards compatibility with redux-thunk
 // https://github.com/gaearon/redux-thunk

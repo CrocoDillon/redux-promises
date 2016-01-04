@@ -1,16 +1,21 @@
-import { createStore, applyMiddleware } from 'redux';
-import promises from '../../src';
+import { combineReducers, applyMiddleware, createStore } from 'redux';
+import { reducer as idleReducer, createMiddleware, ensureIdleState } from '../../src';
 import fetch from './fetch';
 
 // Reducer that just logs time since start and action object
 const startTime = Date.now();
-const reducer = (state, action) => {
+const logReducer = (state = null, action) => {
   console.log(`Dispatch after ${Date.now() - startTime}ms`)
   console.log(JSON.stringify(action, null, 2));
   return state;
 };
 
-const promisesMiddleware = promises();
+const reducer = combineReducers({
+  idle: idleReducer,
+  log: logReducer
+});
+
+const promisesMiddleware = createMiddleware();
 const store = applyMiddleware(promisesMiddleware)(createStore)(reducer);
 
 // Action creator that returns a thunk that returns a promise
@@ -28,6 +33,6 @@ store.dispatch(fetchData('http://api.example.com/some/resouce'));
 store.dispatch(fetchData('http://api.example.com/another/resouce'));
 
 // Now we wait till all required data has been fetched
-promisesMiddleware.then(() => {
+ensureIdleState(store).then(() => {
   console.log(`Fetching all data complete after ${Date.now() - startTime}ms`);
 });
